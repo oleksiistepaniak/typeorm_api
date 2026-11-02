@@ -1,0 +1,27 @@
+# NAME
+name: Deploy to Production Server
+
+# TRIGGER
+on:
+  push:
+    branches: [ "main" ]
+
+# JOBS
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }} # Github (Secrets)
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          script:
+            cd /var/www/typeorm_api
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart typeorm_api
